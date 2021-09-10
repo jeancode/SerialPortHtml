@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controls Arduino Html</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+
+        $(document).ready(function(){
+
+            function closeFoco(){
+
+                $(".itemView").css({
+                    "display": "none"
+                });
+            }
+
+            function str2ab(str){
+
+                var buf = new ArrayBuffer(str.length);
+
+                var bufView = new Uint8Array(buf);
+
+
+                for (var i=0, strLen=str.length; i<strLen; i++) {
+
+                    bufView[i] = str.charCodeAt(i);
+
+                    
+                }
+
+                return buf;
+
+            }
+
+            $("#conect").click(function(){
+                
+                closeFoco();
+
+                $("#conectView").css({
+                    "display": "flex"
+                });
+
+            });
+
+            $("#controls").click(function(){
+                closeFoco();
+
+                $("#controlsView").css({
+                    "display": "flex"
+                });
+            });
+
+
+            $("#conectarBt").click(function(){
+                var temporal = "";
+    
+                navigator.serial.requestPort().then(async (port)=>{
+
+                navigator.serial.getPorts().then(async (ports) => {
+
+                    var serial = ports[0];
+
+                    serial.open({baudRate:9600});
+
+                    
+                    $("#prender").click(async function(){
+
+
+                        const writer = port.writable.getWriter();
+
+                        const data = str2ab("prender\n");
+
+                        console.log(data);
+
+                        await writer.write(data);
+                        // Allow the serial port to be closed later.
+                        writer.releaseLock();
+
+                        
+                    });
+
+                    $("#apagar").click(async function(){
+
+                        const writer = port.writable.getWriter();
+
+                        const data = str2ab("apagar\n");
+
+                        console.log(data);
+
+                        await writer.write(data);
+                        // Allow the serial port to be closed later.
+                        writer.releaseLock();
+
+                    });
+
+            setTimeout(async() =>{
+
+                    while (port.readable) {
+
+
+                        try {
+                                const textDecoder = new TextDecoderStream();
+                                const readableStreamClosed = port.readable.pipeTo(textDecoder.writable);
+                                const reader = textDecoder.readable.getReader();
+
+                                // Listen to data coming from the serial device.
+                            
+                                
+                                while (true) {
+
+                                    
+                                    const { value, done } = await reader.read();
+                                    if (done) {
+                                        // Allow the serial port to be closed later.
+                                        reader.releaseLock();
+                                        break;
+                                    }
+
+                                    temporal += value;
+
+                                    if(value == "\n"){
+
+                                        console.log(temporal);
+                                        temporal = "";
+                                        
+                                    }
+
+
+                                }
+                            
+
+                        } catch (error) {
+                            // Handle |error|...
+                            console.log(error);
+
+                        } finally {
+                            reader.releaseLock();
+                        }
+                    }
+
+                },1000);
+                
+                
+
+            });             
+
+    });
+
+
+                navigator.serial.addEventListener('connect', e => {
+                    
+                    console.log("Puerot COntecot");
+                });
+
+                navigator.serial.addEventListener('disconnect', e => {
+                    console.log("Peurto DEsconecto");
+                });
+
+
+            });
+            
+        });
+
+    </script>
+    <style>
+
+        body{
+            margin: 0;
+            font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+        }
+        #contenido{
+            width: 100%;
+            height: 100%;
+            position:fixed;
+            background-color: reD;;
+            background-image: url(https://cdna.artstation.com/p/assets/images/images/025/160/610/medium/lucas-damian-maza-arduino.jpg?1584849797);
+            background-size: cover;
+            background-position: center;
+            display:flex;
+            justify-content: center;
+            align-items: center;
+            
+
+        }
+        #formControl{
+            width: 300px;
+            height: 300px;
+            background: rgba(255, 255, 255, 0.192);;
+            border-radius: 10px;;
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.356);;
+            overflow: hidden;
+        }
+        #control{
+            width: 100%;
+            height: 80px;
+            background: rgba(199, 199, 199, 0.342);;
+            display: flex;
+            flex-direction:row;
+            border-bottom:1px solid rgba(255, 255, 255, 0.432)(255, 255, 255);;
+            overflow: hidden;
+        }
+        .itemControl{
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            -webkit-user-select: none;
+            color:white;
+        }
+        .itemControl:hover{
+            background: white;
+            color:black;
+            -webkit-transition: all .5s ease;;
+        }
+        #conect{
+            border-right: 1px solid rgba(255, 255, 255, 0.13);;
+        }
+
+        #controlView{
+            flex:1;
+            width: 100%;
+            height: 200px;
+            background: rgba(41, 41, 41, 0);;
+        }
+        .itemView{
+            height: 100%;
+            display: flex;
+            justify-content:center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+
+        /*Boton*/
+        .boton{
+
+            width: 150px;;
+            min-height: 40px;
+            border-radius: 33px;;
+            border:1px solid white;
+            background-color:rgba(180, 180, 180, 0.123);
+            color:white;
+            margin-bottom: 20px;
+        }
+        .boton:hover{
+
+            background-color: rgba(0, 89, 255, 0.493);;
+            -webkit-transition: all .5s ease;;
+        }
+    </style>
+</head>
+<body>
+    <div id="contenido">
+
+
+
+        <div id="formControl">
+
+            <div id="control">
+                <div class="itemControl" id="conect">Conexión</div>
+                <div class="itemControl"id="controls">Controles</div>
+
+            </div>
+            <div id="controlView">
+
+                <div class="itemView"  id="conectView">
+                    <input type="submit" id="conectarBt"class="boton" value="Conectar">
+                </div>
+
+
+                <div class="itemView"  id="controlsView">
+                    <input type="submit" class="boton" id="prender" value="Prender">
+                    <input type="submit" class="boton" id="apagar" value="Apagar">
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </div>
+</body>
+</html>
